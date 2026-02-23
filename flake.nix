@@ -1,5 +1,5 @@
 {
-  description = "tuttut";
+  description = "tutut";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
@@ -24,6 +24,7 @@
         {
           default = pkgs.mkShell {
             buildInputs = with pkgs; [
+              chromium
               go
               gopls
               gofumpt
