@@ -1,9 +1,11 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"log/slog"
 	"os"
-	"os/signal"
+	"strings"
 
 	"github.com/chromedp/chromedp"
 	"github.com/lukasl-dev/tuna/pkg/tuna"
@@ -31,18 +33,42 @@ func (r registerGroup) Run() error {
 		return err
 	}
 
+	var groups []tuna.Group
+
 	err = chromedp.Run(ctx, chromedp.Tasks{
 		tuna.Login(creds),
 		tuna.RegisterGroup(r.Semester, r.Course, r.Group),
+		tuna.ListGroups(&groups, r.Semester, r.Course),
 	})
 	if err != nil {
 		slog.Error("flow failed", "error", err)
 		return err
 	}
 
-	sig := make(chan os.Signal, 1)
-	signal.Notify(sig, os.Interrupt)
-	<-sig
+	selectedGroup := strings.TrimSpace(r.Group)
+	slog.Info("selected group", "group", selectedGroup)
+
+	var selected *tuna.Group
+	for _, group := range groups {
+		if strings.EqualFold(strings.TrimSpace(group.Name), selectedGroup) {
+			g := group
+			selected = &g
+			break
+		}
+	}
+
+	if selected == nil {
+		return fmt.Errorf("selected group %q not present in listed groups", selectedGroup)
+	}
+
+	b, err := json.MarshalIndent(selected, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	if _, err := os.Stdout.Write(append(b, '\n')); err != nil {
+		return err
+	}
 
 	return nil
 }
