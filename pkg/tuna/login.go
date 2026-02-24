@@ -1,6 +1,8 @@
 package tuna
 
 import (
+	"time"
+
 	"github.com/chromedp/chromedp"
 )
 
@@ -12,6 +14,7 @@ type LoginCredentials struct {
 
 func Login(creds LoginCredentials) chromedp.Action {
 	const url = "https://tiss.tuwien.ac.at/admin/authentifizierung"
+	const loginInputDelay = 150 * time.Millisecond
 
 	t := chromedp.Tasks{
 		debug("navigating to login page"),
@@ -26,15 +29,18 @@ func Login(creds LoginCredentials) chromedp.Action {
 
 		debug("typing username into login form"),
 		chromedp.SendKeys("username", creds.Username, chromedp.ByID),
+		chromedp.Sleep(loginInputDelay),
 
 		debug("typing password into login form"),
 		chromedp.SendKeys("password", creds.Password, chromedp.ByID),
+		chromedp.Sleep(loginInputDelay),
 	}
 
 	if creds.TOTP != "" {
 		t = append(t,
 			debug("typing totp into login form"),
 			chromedp.SendKeys("totp", creds.TOTP, chromedp.ByID),
+			chromedp.Sleep(loginInputDelay),
 		)
 	}
 

@@ -9,16 +9,11 @@ import (
 	"github.com/chromedp/chromedp"
 )
 
-type CourseRegistration struct {
-	Semester string
-	Course   string
-}
-
-func RegisterCourse(reg CourseRegistration) chromedp.Action {
+func RegisterCourse(semester, course string) chromedp.Action {
 	url := fmt.Sprintf(
 		"https://tiss.tuwien.ac.at/education/course/courseRegistration.xhtml?semester=%s&courseNr=%s",
-		reg.Semester,
-		reg.Course,
+		semester,
+		course,
 	)
 
 	// IMPORTANT:
@@ -55,8 +50,8 @@ func RegisterCourse(reg CourseRegistration) chromedp.Action {
 		chromedp.ActionFunc(func(context.Context) error {
 			slog.Info(
 				"course registration completed",
-				"semester", reg.Semester,
-				"course", reg.Course,
+				"semester", semester,
+				"course", course,
 				"message", strings.TrimSpace(registrationSuccessMessage),
 			)
 			return nil

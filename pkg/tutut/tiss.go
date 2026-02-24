@@ -12,28 +12,6 @@ import (
 
 const timeLayout = "02.01.2006, 15:04"
 
-type CourseRegistartion struct {
-	Username string
-	Password string
-	TOTP     string
-
-	Semester string
-	CourseNr string
-}
-
-func RegisterInCourse(in CourseRegistartion) chromedp.Action {
-	url := fmt.Sprintf(
-		"https://tiss.tuwien.ac.at/course/educationDetails.xhtml?semester=%s&courseNr=%s",
-		in.Semester,
-		in.CourseNr,
-	)
-
-	return chromedp.Tasks{
-		login(in.Username, in.Password, in.TOTP),
-		chromedp.Navigate(url),
-	}
-}
-
 type GroupRegistration struct {
 	Username string
 	Password string
