@@ -19,6 +19,7 @@ func main() {
 	parser.FatalIfErrorf(err)
 
 	parser.FatalIfErrorf(cmd.configure())
+	parser.FatalIfErrorf(cmd.waitPostpone())
 
-	parser.FatalIfErrorf(ctx.Run())
+	parser.FatalIfErrorf(cmd.runWithRetries(func() error { return ctx.Run() }))
 }
