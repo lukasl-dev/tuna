@@ -58,12 +58,19 @@ func (r root) waitPostpone() error {
 	target := r.Postpone.Time.Add(postponeDelay)
 	now := time.Now()
 	if !target.After(now) {
-		slog.Warn("postpone time already passed, running immediately", "postpone", r.Postpone.Time.Format(time.RFC3339Nano), "target", target.Format(time.RFC3339Nano))
+		slog.Warn("postpone time already passed, running immediately",
+			"postpone", r.Postpone.Time.Format(time.RFC3339Nano),
+			"target", target.Format(time.RFC3339Nano),
+		)
 		return nil
 	}
 
 	delay := time.Until(target)
-	slog.Info("postponing command execution", "postpone", r.Postpone.Time.Format(time.RFC3339Nano), "target", target.Format(time.RFC3339Nano), "delay", delay)
+	slog.Info("postponing command execution",
+		"postpone", r.Postpone.Time.Format(time.RFC3339Nano),
+		"target", target.Format(time.RFC3339Nano),
+		"delay", delay,
+	)
 
 	fired := make(chan struct{})
 	timer := time.AfterFunc(delay, func() {
@@ -88,14 +95,21 @@ func (r root) runWithRetries(run func() error) error {
 		err := run()
 		if err == nil {
 			if attempt > 1 {
-				slog.Info("command succeeded after retry", "attempt", attempt, "max_attempts", maxAttempts)
+				slog.Info("command succeeded after retry",
+					"attempt", attempt,
+					"max_attempts", maxAttempts,
+				)
 			}
 			return nil
 		}
 
 		lastErr = err
 		if attempt < maxAttempts {
-			slog.Warn("command failed, retrying", "attempt", attempt, "max_attempts", maxAttempts, "error", err)
+			slog.Warn("command failed, retrying",
+				"attempt", attempt,
+				"max_attempts", maxAttempts,
+				"error", err,
+			)
 		}
 	}
 
