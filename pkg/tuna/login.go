@@ -1,6 +1,9 @@
 package tuna
 
 import (
+	"context"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/chromedp/chromedp"
@@ -15,17 +18,31 @@ type LoginCredentials struct {
 func Login(creds LoginCredentials) chromedp.Action {
 	const url = "https://tiss.tuwien.ac.at/admin/authentifizierung"
 	const loginInputDelay = 150 * time.Millisecond
+	type loginState struct {
+		LoggedIn       bool   `json:"loggedIn"`
+		LoginErrorText string `json:"loginErrorText"`
+	}
+
+	const loginStateScript = `(() => {
+  const logout = document.querySelector('a.toolLogout');
+  const loginError = document.querySelector('.message-box.error h3')?.textContent?.trim() || '';
+
+  return {
+    loggedIn: Boolean(logout),
+    loginErrorText: loginError,
+  };
+})()`
 
 	t := chromedp.Tasks{
 		debug("navigating to login page"),
 		chromedp.Navigate(url),
 
 		debug("waiting for login page"),
-		chromedp.WaitVisible("#core\\:loginuserpass", chromedp.ByQuery),
+		waitVisible("#core\\:loginuserpass", chromedp.ByQuery),
 
 		debug("waiting for login fields"),
-		chromedp.WaitReady("username", chromedp.ByID),
-		chromedp.WaitReady("password", chromedp.ByID),
+		waitReady("username", chromedp.ByID),
+		waitReady("password", chromedp.ByID),
 
 		debug("typing username into login form"),
 		chromedp.SendKeys("username", creds.Username, chromedp.ByID),
@@ -48,7 +65,28 @@ func Login(creds LoginCredentials) chromedp.Action {
 		debug("submitting login form"),
 		chromedp.Submit("samlloginbutton", chromedp.ByID),
 
-		debug("wait until login finishes"),
-		chromedp.WaitVisible("a.toolLogout", chromedp.ByQuery),
+		debug("waiting for login result"),
+		withTimeout(chromedp.ActionFunc(func(ctx context.Context) error {
+			for {
+				var state loginState
+				if err := chromedp.Run(ctx, chromedp.EvaluateAsDevTools(loginStateScript, &state)); err != nil {
+					return err
+				}
+
+				if state.LoggedIn {
+					return nil
+				}
+
+				if state.LoginErrorText != "" {
+					return fmt.Errorf("login failed: %s", strings.TrimSpace(state.LoginErrorText))
+				}
+
+				select {
+				case <-ctx.Done():
+					return ctx.Err()
+				case <-time.After(100 * time.Millisecond):
+				}
+			}
+		})),
 	)
 }

@@ -73,8 +73,6 @@ func credentials(username, password, totpURL string) (tuna.LoginCredentials, err
 }
 
 func chromedpContext(headless bool) (context.Context, func()) {
-	const runTimeout = 10 * time.Second
-
 	allocatorCtx, cancelAllocator := chromedp.NewExecAllocator(context.TODO(),
 		append(
 			chromedp.DefaultExecAllocatorOptions[:],
@@ -83,10 +81,8 @@ func chromedpContext(headless bool) (context.Context, func()) {
 	)
 
 	ctx, cancel := chromedp.NewContext(allocatorCtx)
-	timeoutCtx, cancelTimeout := context.WithTimeout(ctx, runTimeout)
 
-	return timeoutCtx, func() {
-		cancelTimeout()
+	return ctx, func() {
 		cancelAllocator()
 		cancel()
 	}

@@ -81,7 +81,7 @@ func RegisterGroup(semester, course, group string) chromedp.Action {
 		chromedp.Navigate(url),
 
 		debug("waiting for group list panel"),
-		chromedp.WaitVisible(groupListPanelSelector, chromedp.ByQuery),
+		waitVisible(groupListPanelSelector, chromedp.ByQuery),
 
 		debug("clicking group registration button", "group", group),
 		chromedp.EvaluateAsDevTools(clickScript, &result),
@@ -110,14 +110,14 @@ func RegisterGroup(semester, course, group string) chromedp.Action {
 		}),
 
 		debug("waiting for confirmation registration button"),
-		chromedp.WaitVisible(confirmRegistrationButtonSelector, chromedp.ByQuery),
-		chromedp.WaitEnabled(confirmRegistrationButtonSelector, chromedp.ByQuery),
+		waitVisible(confirmRegistrationButtonSelector, chromedp.ByQuery),
+		waitEnabled(confirmRegistrationButtonSelector, chromedp.ByQuery),
 
 		debug("clicking confirmation registration button"),
 		chromedp.Click(confirmRegistrationButtonSelector, chromedp.ByQuery),
 
 		debug("waiting for group registration success message"),
-		chromedp.WaitVisible(registrationSuccessSelector, chromedp.ByQuery),
+		waitVisible(registrationSuccessSelector, chromedp.ByQuery),
 
 		debug("reading group registration success message"),
 		chromedp.Text(registrationSuccessSelector, &registrationSuccessMessage, chromedp.ByQuery),

@@ -42,7 +42,7 @@ func ListGroups(dst *[]Group, semester, course string) chromedp.Action {
 		chromedp.Navigate(url),
 
 		debug("waiting for group list panel"),
-		chromedp.WaitVisible(groupListPanelSelector, chromedp.ByQuery),
+		waitVisible(groupListPanelSelector, chromedp.ByQuery),
 
 		debug("extracting raw groups"),
 		chromedp.EvaluateAsDevTools(`(() => {
