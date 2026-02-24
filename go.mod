@@ -1,10 +1,15 @@
-module github.com/lukasl-dev/tutut
+module github.com/lukasl-dev/tuna
 
 go 1.25.4
 
-require github.com/chromedp/chromedp v0.14.2
+require (
+	github.com/alecthomas/kong v1.14.0
+	github.com/chromedp/chromedp v0.14.2
+	github.com/pquerna/otp v1.5.0
+)
 
 require (
+	github.com/boombuler/barcode v1.0.1-0.20190219062509-6c824513bacc // indirect
 	github.com/chromedp/cdproto v0.0.0-20250724212937-08a3db8b4327 // indirect
 	github.com/chromedp/sysutil v1.1.0 // indirect
 	github.com/go-json-experiment/json v0.0.0-20250725192818-e39067aee2d2 // indirect
