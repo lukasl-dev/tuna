@@ -61,14 +61,12 @@ func (r registerGroup) Run() error {
 		return fmt.Errorf("selected group %q not present in listed groups", selectedGroup)
 	}
 
-	b, err := json.MarshalIndent(selected, "", "  ")
-	if err != nil {
+	enc := json.NewEncoder(os.Stdout)
+	enc.SetIndent("", "  ")
+	if err = enc.Encode(selected); err != nil {
 		return err
 	}
 
-	if _, err := os.Stdout.Write(append(b, '\n')); err != nil {
-		return err
-	}
-
-	return nil
+	_, err = os.Stdout.WriteString("\n")
+	return err
 }

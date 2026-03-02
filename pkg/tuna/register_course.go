@@ -24,7 +24,7 @@ func RegisterCourse(semester, course string) chromedp.Action {
 	registrationSuccessSelector := `form[id="confirmForm"] div.staticInfoMessage`
 	registrationSuccessMessage := ""
 
-	t := chromedp.Tasks{
+	return chromedp.Tasks{
 		debug("navigating to course registration page", "url", url),
 		chromedp.Navigate(url),
 
@@ -57,6 +57,4 @@ func RegisterCourse(semester, course string) chromedp.Action {
 			return nil
 		}),
 	}
-
-	return t
 }

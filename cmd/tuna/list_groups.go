@@ -48,14 +48,12 @@ func (l listGroups) Run() error {
 		return nil
 	}
 
-	b, err := json.MarshalIndent(groups, "", "  ")
-	if err != nil {
+	enc := json.NewEncoder(os.Stdout)
+	enc.SetIndent("", "  ")
+	if err = enc.Encode(groups); err != nil {
 		return err
 	}
 
-	if _, err := os.Stdout.Write(append(b, '\n')); err != nil {
-		return err
-	}
-
-	return nil
+	_, err = os.Stdout.WriteString("\n")
+	return err
 }
