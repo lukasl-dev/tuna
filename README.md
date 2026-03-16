@@ -99,7 +99,7 @@ Example:
 tuna --postpone "2026-02-24 02:16:00+01:00" register-group ...
 ```
 
-Execution starts **5 seconds after** the given timestamp, never before.
+Execution starts at the given timestamp, never before.
 
 ### `--retries`
 

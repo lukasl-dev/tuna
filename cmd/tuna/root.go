@@ -16,7 +16,7 @@ import (
 
 type root struct {
 	LogLevel string        `short:"l" help:"Set log level" enum:"debug,info,warn,error" default:"info"`
-	Postpone *postponeTime `help:"Run command at this timestamp (execution starts 5s after it)" placeholder:"YYYY-MM-DD HH:MM:SS+TZ"`
+	Postpone *postponeTime `help:"Run command at this timestamp" placeholder:"YYYY-MM-DD HH:MM:SS+TZ"`
 	Retries  uint          `help:"Retry failed command this many times" default:"0"`
 
 	ListGroups     listGroups     `cmd:"list-groups" help:"List groups of a course"`
@@ -53,22 +53,19 @@ func (r root) waitPostpone() error {
 		return nil
 	}
 
-	const postponeDelay = 5 * time.Second
-
-	target := r.Postpone.Time.Add(postponeDelay)
 	now := time.Now()
-	if !target.After(now) {
+	if !r.Postpone.Time.After(now) {
 		slog.Warn("postpone time already passed, running immediately",
 			"postpone", r.Postpone.Time.Format(time.RFC3339Nano),
-			"target", target.Format(time.RFC3339Nano),
+			"target", r.Postpone.Time.Format(time.RFC3339Nano),
 		)
 		return nil
 	}
 
-	delay := time.Until(target)
+	delay := time.Until(r.Postpone.Time)
 	slog.Info("postponing command execution",
 		"postpone", r.Postpone.Time.Format(time.RFC3339Nano),
-		"target", target.Format(time.RFC3339Nano),
+		"target", r.Postpone.Time.Format(time.RFC3339Nano),
 		"delay", delay,
 	)
 
@@ -80,7 +77,7 @@ func (r root) waitPostpone() error {
 
 	<-fired
 
-	if remaining := time.Until(target); remaining > 0 {
+	if remaining := time.Until(r.Postpone.Time); remaining > 0 {
 		time.Sleep(remaining)
 	}
 
