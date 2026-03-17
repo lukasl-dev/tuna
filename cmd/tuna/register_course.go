@@ -33,6 +33,7 @@ func (r registerCourse) Run() error {
 		tuna.RegisterCourse(r.Semester, r.Course),
 	})
 	if err != nil {
+		captureErrorScreenshot(ctx, "register-course")
 		slog.Error("flow failed", "error", err)
 		return err
 	}

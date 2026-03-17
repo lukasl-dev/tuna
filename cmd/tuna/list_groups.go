@@ -37,6 +37,7 @@ func (l listGroups) Run() error {
 		tuna.ListGroups(&groups, l.Semester, l.Course),
 	})
 	if err != nil {
+		captureErrorScreenshot(ctx, "list-groups")
 		slog.Error("flow failed", "error", err)
 		return err
 	}

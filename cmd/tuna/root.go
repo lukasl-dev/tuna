@@ -156,6 +156,22 @@ func chromedpContext(headless bool) (context.Context, func()) {
 	}
 }
 
+func captureErrorScreenshot(ctx context.Context, name string) {
+	var screenshot []byte
+	if err := chromedp.Run(ctx, chromedp.FullScreenshot(&screenshot, 90)); err != nil {
+		slog.Warn("failed to capture screenshot", "name", name, "error", err)
+		return
+	}
+
+	path := fmt.Sprintf("tuna-error-%s-%s.png", name, time.Now().Format("20060102-150405.000000000"))
+	if err := os.WriteFile(path, screenshot, 0o600); err != nil {
+		slog.Warn("failed to save screenshot", "path", path, "error", err)
+		return
+	}
+
+	slog.Error("saved error screenshot", "path", path)
+}
+
 type postponeTime struct {
 	time.Time
 }
