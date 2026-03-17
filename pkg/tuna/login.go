@@ -24,7 +24,7 @@ func Login(creds LoginCredentials) chromedp.Action {
 	}
 
 	const loginStateScript = `(() => {
-  const logout = document.querySelector('a.toolLogout');
+  const logout = document.querySelector('#logoutLink, .toolLogout');
   const loginError = document.querySelector('.message-box.error h3')?.textContent?.trim() || '';
 
   return {
