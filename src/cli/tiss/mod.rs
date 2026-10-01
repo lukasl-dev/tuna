@@ -37,7 +37,7 @@ impl Args {
             Command::Login => login::run(self.login).await,
             Command::Messages => messages::run(self.login).await,
             Command::Programmes(command) => command.run(self.login).await,
-            Command::Courses(command) => command.run(),
+            Command::Courses(command) => command.run(self.login).await,
             Command::Groups(command) => command.run(self.login).await,
         }
     }
