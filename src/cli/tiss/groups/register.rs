@@ -9,7 +9,14 @@ pub struct Args {
     pub group: String,
 }
 
+#[tracing::instrument(
+    name = "tiss.groups.register",
+    skip(args),
+    fields(course = %args.course, group = %args.group)
+)]
 pub fn run(args: Args) -> std::io::Result<()> {
+    tracing::debug!("Registering for course group");
+
     Err(std::io::Error::new(
         std::io::ErrorKind::Unsupported,
         format!(
