@@ -25,8 +25,11 @@ pub struct Args {
     )]
     totp_code: Option<String>,
 
-    #[arg(long, default_value = "http://localhost:9515")]
-    pub webdriver: String,
+    #[arg(
+        long,
+        help = "Use an external WebDriver instead of starting ChromeDriver"
+    )]
+    pub webdriver: Option<String>,
 
     #[arg(long)]
     pub headed: bool,

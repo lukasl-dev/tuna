@@ -1,12 +1,6 @@
 # tuna
 
-Start ChromeDriver:
-
-```sh
-chromedriver --port=9515
-```
-
-In another terminal, start the foreground worker with the `TUNA_TISS_*`
+Start the foreground worker with the `TUNA_TISS_*`
 credentials in its environment:
 
 ```sh
@@ -26,7 +20,10 @@ cargo run -- tiss groups list --semester 2026W --course 104340
 cargo run -- stop
 ```
 
-The browser opens lazily and stays alive between commands. The worker checks
+The worker starts its own ChromeDriver on an automatically assigned local port.
+ChromeDriver and Chromium must be on `PATH`; the Nix development shell and
+Linux package provide both. The browser opens lazily and stays alive between
+commands. The worker checks
 authentication before each operation and logs in only when necessary. Prefer
 `TUNA_TISS_TOTP_URL` for automatic reauthentication; a fixed TOTP code expires.
 
@@ -45,4 +42,7 @@ Credentials, `--webdriver`, and `--headed` belong to `serve`. Use `--socket` or
 by you with permissions `0700`; the socket itself has permissions `0600`.
 The default is `$XDG_RUNTIME_DIR/tuna/worker.sock`, falling back to the user
 cache directory. `stop`, Ctrl-C, and SIGTERM close the browser and remove the socket.
+They also stop the worker-owned ChromeDriver. Use `serve --webdriver URL` to
+connect to an externally managed driver instead; that process is never stopped
+by tuna.
 

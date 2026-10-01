@@ -1,3 +1,4 @@
+use crate::chromedriver::ChromeDriver;
 use crate::cli::serve;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -249,6 +250,7 @@ pub async fn request(socket: &Path, request: Request) -> io::Result<()> {
 
 struct Worker {
     options: serve::Args,
+    webdriver: String,
     driver: Option<WebDriver>,
 }
 
@@ -290,7 +292,7 @@ impl Worker {
             caps.set_headless()?;
         }
 
-        let driver = WebDriver::new(&self.options.webdriver, caps).await?;
+        let driver = WebDriver::new(&self.webdriver, caps).await?;
         self.driver = Some(driver);
 
         tracing::info!("Opened browser session");
@@ -373,16 +375,33 @@ impl Worker {
 
 pub async fn serve(socket: &Path, options: serve::Args) -> io::Result<()> {
     let endpoint = WorkerSocket::bind(socket).await?;
-    let mut worker = Worker {
-        options,
-        driver: None,
-    };
-
     let mut terminate = tokio::signal::unix::signal(
         tokio::signal::unix::SignalKind::terminate(),
     )?;
-    let interrupt = tokio::signal::ctrl_c();
-    tokio::pin!(interrupt);
+    let mut interrupt = tokio::signal::unix::signal(
+        tokio::signal::unix::SignalKind::interrupt(),
+    )?;
+
+    let mut chromedriver = if options.webdriver.is_none() {
+        let driver = tokio::select! {
+            driver = ChromeDriver::start() => driver?,
+            _ = interrupt.recv() => return Ok(()),
+            _ = terminate.recv() => return Ok(()),
+        };
+        Some(driver)
+    } else {
+        None
+    };
+
+    let webdriver = options
+        .webdriver
+        .clone()
+        .unwrap_or_else(|| chromedriver.as_ref().unwrap().url.clone());
+    let mut worker = Worker {
+        options,
+        webdriver,
+        driver: None,
+    };
 
     tracing::info!(socket = %socket.display(), "Worker ready");
 
@@ -390,11 +409,18 @@ pub async fn serve(socket: &Path, options: serve::Args) -> io::Result<()> {
         loop {
             let mut stream = tokio::select! {
                 connection = endpoint.listener.accept() => connection?.0,
-                signal = &mut interrupt => {
-                    signal?;
-                    break;
-                },
+                _ = interrupt.recv() => break,
                 _ = terminate.recv() => break,
+                status = async {
+                    match &mut chromedriver {
+                        Some(driver) => driver.child.wait().await,
+                        None => std::future::pending().await,
+                    }
+                } => {
+                    return Err(io::Error::other(format!(
+                        "chromedriver exited unexpectedly: {}", status?
+                    )));
+                },
             };
 
             let incoming = tokio::time::timeout(
@@ -444,7 +470,11 @@ pub async fn serve(socket: &Path, options: serve::Args) -> io::Result<()> {
     .await;
 
     let cleanup = worker.close().await.map_err(io::Error::other);
+    let driver_cleanup = match &mut chromedriver {
+        Some(driver) => driver.child.kill().await,
+        None => Ok(()),
+    };
 
     tracing::info!("Worker stopped");
-    result.and(cleanup)
+    result.and(cleanup).and(driver_cleanup)
 }

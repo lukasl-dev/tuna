@@ -1,3 +1,4 @@
+mod chromedriver;
 mod cli;
 mod worker;
 

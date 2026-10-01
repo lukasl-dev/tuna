@@ -33,6 +33,16 @@
             commonArgs
             // {
               cargoArtifacts = artifacts;
+              nativeBuildInputs = pkgs.lib.optionals pkgs.stdenv.hostPlatform.isLinux [
+                pkgs.makeWrapper
+              ];
+              postInstall = pkgs.lib.optionalString pkgs.stdenv.hostPlatform.isLinux ''
+                wrapProgram "$out/bin/tuna" \
+                  --prefix PATH : ${pkgs.lib.makeBinPath [
+                    pkgs.chromium
+                    pkgs.chromedriver
+                  ]}
+              '';
               meta.mainProgram = "tuna";
             }
           );
