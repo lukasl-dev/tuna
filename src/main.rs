@@ -25,7 +25,7 @@ async fn main() -> ExitCode {
     }
 
     let result = match cli.command {
-        Command::Tiss(command) => command.run().await,
+        Command::Tiss(args) => args.run().await,
         Command::Tuwel(command) => command.run(),
     };
 

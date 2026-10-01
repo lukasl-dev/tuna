@@ -1,10 +1,8 @@
 #[derive(clap::Args)]
 pub struct Args {
-    /// Course number
     #[arg(long)]
     pub course: String,
 
-    /// Group identifier
     #[arg(long)]
     pub group: String,
 }

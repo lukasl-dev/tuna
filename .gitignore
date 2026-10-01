@@ -4,3 +4,4 @@ result
 .env
 dist/
 tuna-error-*.png
+.env

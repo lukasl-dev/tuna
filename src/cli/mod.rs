@@ -21,8 +21,7 @@ pub enum LogFormat {
 
 #[derive(Subcommand)]
 pub enum Command {
-    #[command(subcommand)]
-    Tiss(tiss::Command),
+    Tiss(tiss::Args),
 
     #[command(subcommand)]
     Tuwel(tuwel::Command),

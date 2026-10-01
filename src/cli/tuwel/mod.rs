@@ -4,7 +4,6 @@ use clap::Subcommand;
 
 #[derive(Subcommand)]
 pub enum Command {
-    /// Manage courses
     #[command(subcommand)]
     Courses(courses::Command),
 }
