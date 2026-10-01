@@ -1944,6 +1944,8 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "clap",
+ "dirs",
+ "libc",
  "serde",
  "serde_json",
  "thirtyfour",

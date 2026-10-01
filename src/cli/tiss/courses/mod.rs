@@ -1,7 +1,6 @@
 pub mod get;
 mod list;
 
-use super::login;
 use clap::Subcommand;
 
 #[derive(Subcommand)]
@@ -12,9 +11,9 @@ pub enum Command {
 }
 
 impl Command {
-    pub async fn run(self, login: login::Args) -> std::io::Result<()> {
+    pub async fn run(self, socket: &std::path::Path) -> std::io::Result<()> {
         match self {
-            Self::Get(args) => get::run(args, login).await,
+            Self::Get(args) => get::run(args, socket).await,
             Self::List => list::run(),
         }
     }

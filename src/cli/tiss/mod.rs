@@ -6,15 +6,6 @@ pub mod programmes;
 
 use clap::Subcommand;
 
-#[derive(clap::Args)]
-pub struct Args {
-    #[command(flatten)]
-    login: login::Args,
-
-    #[command(subcommand)]
-    command: Command,
-}
-
 #[derive(Subcommand)]
 pub enum Command {
     Login,
@@ -31,14 +22,14 @@ pub enum Command {
     Groups(groups::Command),
 }
 
-impl Args {
-    pub async fn run(self) -> std::io::Result<()> {
-        match self.command {
-            Command::Login => login::run(self.login).await,
-            Command::Messages => messages::run(self.login).await,
-            Command::Programmes(command) => command.run(self.login).await,
-            Command::Courses(command) => command.run(self.login).await,
-            Command::Groups(command) => command.run(self.login).await,
+impl Command {
+    pub async fn run(self, socket: &std::path::Path) -> std::io::Result<()> {
+        match self {
+            Self::Login => login::run(socket).await,
+            Self::Messages => messages::run(socket).await,
+            Self::Programmes(command) => command.run(socket).await,
+            Self::Courses(command) => command.run(socket).await,
+            Self::Groups(command) => command.run(socket).await,
         }
     }
 }

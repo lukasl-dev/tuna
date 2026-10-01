@@ -1,3 +1,4 @@
+pub mod serve;
 pub mod tiss;
 pub mod tuwel;
 
@@ -8,6 +9,9 @@ use clap::{Parser, Subcommand, ValueEnum};
 pub struct Cli {
     #[arg(long, global = true, value_enum, default_value = "text")]
     pub log_format: LogFormat,
+
+    #[arg(long, global = true, env = "TUNA_SOCKET")]
+    pub socket: Option<std::path::PathBuf>,
 
     #[command(subcommand)]
     pub command: Command,
@@ -21,7 +25,12 @@ pub enum LogFormat {
 
 #[derive(Subcommand)]
 pub enum Command {
-    Tiss(tiss::Args),
+    Serve(serve::Args),
+
+    Stop,
+
+    #[command(subcommand)]
+    Tiss(tiss::Command),
 
     #[command(subcommand)]
     Tuwel(tuwel::Command),

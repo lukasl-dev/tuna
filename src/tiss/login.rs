@@ -8,10 +8,51 @@ pub async fn login(
     password: &str,
     totp_code: &str,
 ) -> WebDriverResult<()> {
-    tracing::debug!("Opening login page");
+    ensure_authenticated(driver, login, password, || Ok(totp_code.to_owned()))
+        .await
+}
+
+#[tracing::instrument(name = "tiss.ensure_authenticated", skip_all)]
+pub async fn ensure_authenticated(
+    driver: &WebDriver,
+    login: &str,
+    password: &str,
+    totp_code: impl FnOnce() -> WebDriverResult<String>,
+) -> WebDriverResult<()> {
     driver
         .goto("https://tiss.tuwien.ac.at/admin/authentifizierung")
         .await?;
+    driver
+        .query(By::Css(
+            "#logoutLink, .toolLogout, [id='core:loginuserpass']",
+        ))
+        .first()
+        .await?;
+
+    let logged_in: bool = driver
+        .execute(
+            "return Boolean(document.querySelector('#logoutLink, .toolLogout'));",
+            vec![],
+        )
+        .await?
+        .convert()?;
+
+    if logged_in {
+        tracing::debug!("Reusing authenticated browser session");
+        return Ok(());
+    }
+
+    tracing::info!("Authenticating with TISS");
+    submit(driver, login, password, totp_code).await
+}
+
+#[tracing::instrument(name = "tiss.login.submit", skip_all)]
+async fn submit(
+    driver: &WebDriver,
+    login: &str,
+    password: &str,
+    totp_code: impl FnOnce() -> WebDriverResult<String>,
+) -> WebDriverResult<()> {
     driver
         .query(By::Id("core:loginuserpass"))
         .and_displayed()
@@ -24,11 +65,12 @@ pub async fn login(
         input.send_keys(value).await?;
     }
 
+    let totp_code = totp_code()?;
     if !totp_code.is_empty() {
         let input =
             driver.query(By::Id("totp")).and_displayed().first().await?;
         input.clear().await?;
-        input.send_keys(totp_code).await?;
+        input.send_keys(&totp_code).await?;
     }
 
     tracing::debug!("Submitting login form");

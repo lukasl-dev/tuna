@@ -1,4 +1,5 @@
 mod cli;
+mod worker;
 
 use clap::Parser;
 use cli::{Cli, Command, LogFormat};
@@ -24,10 +25,18 @@ async fn main() -> ExitCode {
         LogFormat::Json => subscriber.json().init(),
     }
 
-    let result = match cli.command {
-        Command::Tiss(args) => args.run().await,
-        Command::Tuwel(command) => command.run(),
-    };
+    let result = async {
+        let socket = worker::socket_path(cli.socket)?;
+        match cli.command {
+            Command::Serve(args) => worker::serve(&socket, args).await,
+            Command::Stop => {
+                worker::request(&socket, worker::Request::Stop).await
+            }
+            Command::Tiss(command) => command.run(&socket).await,
+            Command::Tuwel(command) => command.run(),
+        }
+    }
+    .await;
 
     match result {
         Ok(()) => ExitCode::SUCCESS,
