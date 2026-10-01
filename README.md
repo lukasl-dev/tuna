@@ -30,6 +30,16 @@ The browser opens lazily and stays alive between commands. The worker checks
 authentication before each operation and logs in only when necessary. Prefer
 `TUNA_TISS_TOTP_URL` for automatic reauthentication; a fixed TOTP code expires.
 
+Group registration submits and confirms a real registration:
+
+```sh
+cargo run -- tiss groups register --semester 2026W --course 104340 --group "Group name"
+```
+
+Group names are matched case-insensitively with whitespace normalized. The
+command returns the TISS confirmation message as JSON. Registration failures
+are not retried automatically; check TISS before retrying an uncertain outcome.
+
 Credentials, `--webdriver`, and `--headed` belong to `serve`. Use `--socket` or
 `TUNA_SOCKET` to select a different worker. The socket directory must be owned
 by you with permissions `0700`; the socket itself has permissions `0600`.

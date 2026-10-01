@@ -1,26 +1,31 @@
+use crate::worker::{self, Request};
+use std::path::Path;
+
 #[derive(clap::Args)]
 pub struct Args {
     #[arg(long)]
-    pub course: String,
+    semester: String,
 
     #[arg(long)]
-    pub group: String,
+    course: String,
+
+    #[arg(long)]
+    group: String,
 }
 
 #[tracing::instrument(
-    name = "tiss.groups.register",
-    skip(args),
-    fields(course = %args.course, group = %args.group)
+    name = "tiss.groups.register.command",
+    skip(args, socket),
+    fields(semester = %args.semester, course = %args.course, group = %args.group)
 )]
-pub fn run(args: Args) -> std::io::Result<()> {
-    tracing::debug!("Registering for course group");
-
-    Err(std::io::Error::new(
-        std::io::ErrorKind::Unsupported,
-        format!(
-            "tiss groups register is not implemented yet \
-             (course {}, group {})",
-            args.course, args.group
-        ),
-    ))
+pub async fn run(args: Args, socket: &Path) -> std::io::Result<()> {
+    worker::request(
+        socket,
+        Request::GroupsRegister {
+            semester: args.semester,
+            course: args.course,
+            group: args.group,
+        },
+    )
+    .await
 }
