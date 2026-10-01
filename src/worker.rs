@@ -25,6 +25,7 @@ pub enum Request {
     Messages,
     Programmes,
     CourseGet { semester: String, course: String },
+    CourseExams { semester: String, course: String },
     GroupsList { semester: String, course: String },
     Stop,
 }
@@ -316,6 +317,14 @@ impl Worker {
                     serde_json::to_value(
                         tuna::tiss::courses::get(driver, &semester, &course)
                             .await?,
+                    )?
+                }
+                Request::CourseExams { semester, course } => {
+                    serde_json::to_value(
+                        tuna::tiss::courses::exams::list(
+                            driver, &semester, &course,
+                        )
+                        .await?,
                     )?
                 }
                 Request::GroupsList { semester, course } => {

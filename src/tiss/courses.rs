@@ -1,3 +1,5 @@
+pub mod exams;
+
 use serde::{Deserialize, Serialize};
 use thirtyfour::prelude::*;
 use url::Url;

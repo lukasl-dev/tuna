@@ -21,6 +21,7 @@ cargo run -- tiss login
 cargo run -- tiss messages
 cargo run -- tiss programmes list
 cargo run -- tiss courses get --semester 2026W --course 104340
+cargo run -- tiss courses exams --semester 2026W --course 194024
 cargo run -- tiss groups list --semester 2026W --course 104340
 cargo run -- stop
 ```
