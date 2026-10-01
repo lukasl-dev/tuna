@@ -2,6 +2,7 @@ pub mod courses;
 pub mod groups;
 pub mod login;
 pub mod messages;
+pub mod programmes;
 
 use clap::Subcommand;
 
@@ -21,6 +22,9 @@ pub enum Command {
     Messages,
 
     #[command(subcommand)]
+    Programmes(programmes::Command),
+
+    #[command(subcommand)]
     Courses(courses::Command),
 
     #[command(subcommand)]
@@ -32,6 +36,7 @@ impl Args {
         match self.command {
             Command::Login => login::run(self.login).await,
             Command::Messages => messages::run(self.login).await,
+            Command::Programmes(command) => command.run(self.login).await,
             Command::Courses(command) => command.run(),
             Command::Groups(command) => command.run(self.login).await,
         }
