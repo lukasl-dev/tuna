@@ -4,23 +4,18 @@ use totp_rs::TOTP;
 
 #[derive(clap::Args)]
 pub struct Args {
-    /// TISS username
     #[arg(long)]
     username: String,
 
-    /// TISS password
     #[arg(long)]
     password: String,
 
-    /// Generate a code from an otpauth://totp/... URI
     #[arg(long, conflicts_with = "totp_code")]
     totp_url: Option<String>,
 
-    /// Use an existing TOTP code (leading zeros are preserved)
     #[arg(long, conflicts_with = "totp_url")]
     totp_code: Option<String>,
 
-    /// WebDriver server URL
     #[arg(long, default_value = "http://localhost:9515")]
     webdriver: String,
 }
@@ -30,7 +25,6 @@ pub async fn run(args: Args) -> io::Result<()> {
     let totp_code = match (args.totp_code, args.totp_url) {
         (Some(code), _) => code,
         (_, Some(url)) => TOTP::from_url(url)
-            // URL parsing errors may contain the secret; do not forward them.
             .map_err(|_| {
                 io::Error::new(
                     io::ErrorKind::InvalidInput,
