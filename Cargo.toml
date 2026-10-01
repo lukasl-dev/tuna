@@ -8,5 +8,6 @@ license = "AGPL-3.0-only"
 clap = { version = "4", features = ["derive"] }
 thirtyfour = "0.37.5"
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+totp-rs = { version = "5", features = ["otpauth"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }

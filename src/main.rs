@@ -6,7 +6,8 @@ use std::io::IsTerminal;
 use std::process::ExitCode;
 use tracing_subscriber::EnvFilter;
 
-fn main() -> ExitCode {
+#[tokio::main]
+async fn main() -> ExitCode {
     let cli = Cli::parse();
 
     let subscriber = tracing_subscriber::fmt()
@@ -24,7 +25,7 @@ fn main() -> ExitCode {
     }
 
     let result = match cli.command {
-        Command::Tiss(command) => command.run(),
+        Command::Tiss(command) => command.run().await,
         Command::Tuwel(command) => command.run(),
     };
 
