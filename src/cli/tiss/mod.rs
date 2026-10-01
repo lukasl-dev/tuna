@@ -1,6 +1,7 @@
 pub mod courses;
 pub mod groups;
 pub mod login;
+pub mod messages;
 
 use clap::Subcommand;
 
@@ -17,6 +18,8 @@ pub struct Args {
 pub enum Command {
     Login,
 
+    Messages,
+
     #[command(subcommand)]
     Courses(courses::Command),
 
@@ -28,6 +31,7 @@ impl Args {
     pub async fn run(self) -> std::io::Result<()> {
         match self.command {
             Command::Login => login::run(self.login).await,
+            Command::Messages => messages::run(self.login).await,
             Command::Courses(command) => command.run(),
             Command::Groups(command) => command.run(self.login).await,
         }
