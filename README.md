@@ -13,6 +13,7 @@ Commands in other terminals reuse the worker's browser without needing credentia
 ```sh
 cargo run -- tiss login
 cargo run -- tuwel login
+cargo run -- tuwel notifications list
 cargo run -- tiss messages
 cargo run -- tiss programmes list
 cargo run -- tiss courses get --semester 2026W --course 104340
@@ -29,6 +30,11 @@ operation, reusing the shared TU Wien IdP session and logging in only when
 necessary. `tiss login` and `tuwel login` both ensure that both sessions are ready.
 The existing `TUNA_TISS_*` credentials are used for both services. Prefer
 `TUNA_TISS_TOTP_URL` for automatic reauthentication; a fixed TOTP code expires.
+
+TUWEL notifications include `read` and `read_at`, alongside their title, body,
+context link, and creation time. Listing fetches the full list through Moodle's
+read-only API without selecting notifications or marking them as read. Timestamps
+are returned in UTC.
 
 Group registration submits and confirms a real registration:
 

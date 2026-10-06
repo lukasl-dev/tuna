@@ -23,6 +23,7 @@ use tokio::net::{UnixListener, UnixStream};
 )]
 pub enum Request {
     Login,
+    TuwelNotificationsList,
     Messages,
     Programmes,
     CourseGet {
@@ -331,6 +332,9 @@ impl Worker {
         let result: WebDriverResult<Value> = async {
             Ok(match request {
                 Request::Login | Request::Stop => Value::Null,
+                Request::TuwelNotificationsList => serde_json::to_value(
+                    tuna::tuwel::notifications::list(driver).await?,
+                )?,
                 Request::Messages => serde_json::to_value(
                     tuna::tiss::messages::messages(driver).await?,
                 )?,
