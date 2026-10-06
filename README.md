@@ -12,6 +12,7 @@ Commands in other terminals reuse the worker's browser without needing credentia
 
 ```sh
 cargo run -- tiss login
+cargo run -- tuwel login
 cargo run -- tiss messages
 cargo run -- tiss programmes list
 cargo run -- tiss courses get --semester 2026W --course 104340
@@ -23,8 +24,10 @@ cargo run -- stop
 The worker starts its own ChromeDriver on an automatically assigned local port.
 ChromeDriver and Chromium must be on `PATH`; the Nix development shell and
 Linux package provide both. The browser opens lazily and stays alive between
-commands. The worker checks
-authentication before each operation and logs in only when necessary. Prefer
+commands. The worker checks both TISS and TUWEL authentication before each
+operation, reusing the shared TU Wien IdP session and logging in only when
+necessary. `tiss login` and `tuwel login` both ensure that both sessions are ready.
+The existing `TUNA_TISS_*` credentials are used for both services. Prefer
 `TUNA_TISS_TOTP_URL` for automatic reauthentication; a fixed TOTP code expires.
 
 Group registration submits and confirms a real registration:

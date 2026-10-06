@@ -308,6 +308,14 @@ impl Worker {
             &self.options.password,
             || self.options.totp_code().map_err(WebDriverError::IoError),
         )
+        .await?;
+
+        tuna::tuwel::login::ensure_authenticated(
+            driver,
+            &self.options.username,
+            &self.options.password,
+            || self.options.totp_code().map_err(WebDriverError::IoError),
+        )
         .await
     }
 

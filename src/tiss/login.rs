@@ -1,4 +1,3 @@
-use std::time::Duration;
 use thirtyfour::prelude::*;
 
 #[tracing::instrument(name = "tiss.login", skip_all)]
@@ -31,7 +30,8 @@ pub async fn ensure_authenticated(
 
     let logged_in: bool = driver
         .execute(
-            "return Boolean(document.querySelector('#logoutLink, .toolLogout'));",
+            "return location.origin === 'https://tiss.tuwien.ac.at' \
+             && Boolean(document.querySelector('#logoutLink, .toolLogout'));",
             vec![],
         )
         .await?
@@ -43,73 +43,20 @@ pub async fn ensure_authenticated(
     }
 
     tracing::info!("Authenticating with TISS");
-    submit(driver, login, password, totp_code).await
-}
+    crate::idp::login(driver, login, password, totp_code).await?;
 
-#[tracing::instrument(name = "tiss.login.submit", skip_all)]
-async fn submit(
-    driver: &WebDriver,
-    login: &str,
-    password: &str,
-    totp_code: impl FnOnce() -> WebDriverResult<String>,
-) -> WebDriverResult<()> {
     driver
-        .query(By::Id("core:loginuserpass"))
-        .and_displayed()
+        .query(By::Css("#logoutLink, .toolLogout"))
         .first()
         .await?;
 
-    for (id, value) in [("username", login), ("password", password)] {
-        let input = driver.query(By::Id(id)).and_displayed().first().await?;
-        input.clear().await?;
-        input.send_keys(value).await?;
+    if driver.current_url().await?.origin().ascii_serialization()
+        != "https://tiss.tuwien.ac.at"
+    {
+        return Err(WebDriverError::ParseError(
+            "TISS login returned an unexpected origin".into(),
+        ));
     }
 
-    let totp_code = totp_code()?;
-    if !totp_code.is_empty() {
-        let input =
-            driver.query(By::Id("totp")).and_displayed().first().await?;
-        input.clear().await?;
-        input.send_keys(&totp_code).await?;
-    }
-
-    tracing::debug!("Submitting login form");
-    driver
-        .query(By::Id("samlloginbutton"))
-        .and_displayed()
-        .first()
-        .await?
-        .click()
-        .await?;
-
-    tokio::time::timeout(Duration::from_secs(30), async {
-        loop {
-            let (logged_in, error): (bool, String) = driver
-                .execute(
-                    r#"return [
-                        Boolean(document.querySelector('#logoutLink, .toolLogout')),
-                        document.querySelector('.message-box.error h3')
-                            ?.textContent?.trim() || ''
-                    ];"#,
-                    vec![],
-                )
-                .await?
-                .convert()?;
-
-            if logged_in {
-                tracing::debug!("Login succeeded");
-                return Ok(());
-            }
-            if !error.is_empty() {
-                return Err(WebDriverError::IoError(std::io::Error::new(
-                    std::io::ErrorKind::PermissionDenied,
-                    format!("TISS login failed: {error}"),
-                )));
-            }
-
-            tokio::time::sleep(Duration::from_millis(100)).await;
-        }
-    })
-    .await
-    .map_err(|_| WebDriverError::Timeout("waiting for TISS login result".into()))?
+    Ok(())
 }

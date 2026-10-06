@@ -34,7 +34,7 @@ async fn main() -> ExitCode {
                 worker::request(&socket, worker::Request::Stop).await
             }
             Command::Tiss(command) => command.run(&socket).await,
-            Command::Tuwel(command) => command.run(),
+            Command::Tuwel(command) => command.run(&socket).await,
         }
     }
     .await;
