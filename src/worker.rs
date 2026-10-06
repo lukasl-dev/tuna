@@ -24,6 +24,7 @@ use tokio::net::{UnixListener, UnixStream};
 pub enum Request {
     Login,
     TuwelNotificationsList,
+    TuwelTimeline,
     Messages,
     Programmes,
     CourseGet {
@@ -334,6 +335,9 @@ impl Worker {
                 Request::Login | Request::Stop => Value::Null,
                 Request::TuwelNotificationsList => serde_json::to_value(
                     tuna::tuwel::notifications::list(driver).await?,
+                )?,
+                Request::TuwelTimeline => serde_json::to_value(
+                    tuna::tuwel::timeline::timeline(driver).await?,
                 )?,
                 Request::Messages => serde_json::to_value(
                     tuna::tiss::messages::messages(driver).await?,

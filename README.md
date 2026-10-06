@@ -14,6 +14,7 @@ Commands in other terminals reuse the worker's browser without needing credentia
 cargo run -- tiss login
 cargo run -- tuwel login
 cargo run -- tuwel notifications list
+cargo run -- tuwel timeline
 cargo run -- tiss messages
 cargo run -- tiss programmes list
 cargo run -- tiss courses get --semester 2026W --course 104340
@@ -35,6 +36,13 @@ TUWEL notifications include `read` and `read_at`, alongside their title, body,
 context link, and creation time. Listing fetches the full list through Moodle's
 read-only API without selecting notifications or marking them as read. Timestamps
 are returned in UTC.
+
+`tuwel timeline` returns the dashboard's All view, including all result pages,
+using language-independent Moodle identifiers. It includes event/activity types,
+course information, UTC event times, overdue status, and action availability.
+The dashboard's local midnight and All filter's date range are respected;
+saved filters and sorting preferences are not changed. Activity links and
+action buttons are never followed.
 
 Group registration submits and confirms a real registration:
 
