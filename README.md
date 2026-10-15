@@ -15,6 +15,7 @@ cargo run -- tiss login
 cargo run -- tuwel login
 cargo run -- tuwel notifications list
 cargo run -- tuwel timeline
+cargo run -- tuwel course get --id 82702
 cargo run -- tuwel quizzes get --id 3061354
 cargo run -- tuwel quizzes get --id 2984776
 cargo run -- tiss messages
@@ -56,6 +57,13 @@ form tokens are not returned.
 Opening a Moodle quiz overview is not strictly side-effect-free: Moodle logs
 the view, may update completion tracking, and can finalise an already-expired
 attempt. This command only reads the resulting overview, not quiz questions.
+
+`tuwel course get --id ID` returns the course name, format, ordered sections,
+summaries, and activities with their types, descriptions, links, and availability
+messages. Collapsed topic content is included; tile sections are fetched through
+their section overviews without changing saved preferences. Only content made
+available to the current user is returned. Activity links and completion controls
+are never activated; Moodle may record course/section views.
 
 Group registration submits and confirms a real registration:
 

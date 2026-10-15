@@ -28,6 +28,9 @@ pub enum Request {
     TuwelQuizGet {
         id: u64,
     },
+    TuwelCourseGet {
+        id: u64,
+    },
     Messages,
     Programmes,
     CourseGet {
@@ -344,6 +347,9 @@ impl Worker {
                 )?,
                 Request::TuwelQuizGet { id } => serde_json::to_value(
                     tuna::tuwel::quizzes::get(driver, id).await?,
+                )?,
+                Request::TuwelCourseGet { id } => serde_json::to_value(
+                    tuna::tuwel::course::get(driver, id).await?,
                 )?,
                 Request::Messages => serde_json::to_value(
                     tuna::tiss::messages::messages(driver).await?,

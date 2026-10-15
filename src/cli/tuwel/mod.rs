@@ -1,3 +1,4 @@
+pub mod course;
 pub mod courses;
 pub mod login;
 pub mod notifications;
@@ -11,6 +12,9 @@ pub enum Command {
     Login,
 
     Timeline,
+
+    #[command(subcommand)]
+    Course(course::Command),
 
     #[command(subcommand)]
     Quizzes(quizzes::Command),
@@ -27,6 +31,7 @@ impl Command {
         match self {
             Self::Login => login::run(socket).await,
             Self::Timeline => timeline::run(socket).await,
+            Self::Course(command) => command.run(socket).await,
             Self::Quizzes(command) => command.run(socket).await,
             Self::Notifications(command) => command.run(socket).await,
             Self::Courses(command) => command.run(),
