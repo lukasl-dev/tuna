@@ -1,6 +1,7 @@
 pub mod courses;
 pub mod login;
 pub mod notifications;
+pub mod quizzes;
 pub mod timeline;
 
 use clap::Subcommand;
@@ -10,6 +11,9 @@ pub enum Command {
     Login,
 
     Timeline,
+
+    #[command(subcommand)]
+    Quizzes(quizzes::Command),
 
     #[command(subcommand)]
     Notifications(notifications::Command),
@@ -23,6 +27,7 @@ impl Command {
         match self {
             Self::Login => login::run(socket).await,
             Self::Timeline => timeline::run(socket).await,
+            Self::Quizzes(command) => command.run(socket).await,
             Self::Notifications(command) => command.run(socket).await,
             Self::Courses(command) => command.run(),
         }

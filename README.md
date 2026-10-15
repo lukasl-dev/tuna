@@ -15,6 +15,8 @@ cargo run -- tiss login
 cargo run -- tuwel login
 cargo run -- tuwel notifications list
 cargo run -- tuwel timeline
+cargo run -- tuwel quizzes get --id 3061354
+cargo run -- tuwel quizzes get --id 2984776
 cargo run -- tiss messages
 cargo run -- tiss programmes list
 cargo run -- tiss courses get --semester 2026W --course 104340
@@ -43,6 +45,17 @@ course information, UTC event times, overdue status, and action availability.
 The dashboard's local midnight and All filter's date range are respected;
 saved filters and sorting preferences are not changed. Activity links and
 action buttons are never followed.
+
+`tuwel quizzes get --id ID` uses the course-module `id` from a quiz's `view.php`
+URL. It returns the overview's title, course, description, dates, access
+conditions, notices, result, and visible attempt summaries. Labels, dates, and
+grades retain their displayed text; selectors do not depend on German/English
+labels. Start, resume, review, and submission controls are never clicked, and
+form tokens are not returned.
+
+Opening a Moodle quiz overview is not strictly side-effect-free: Moodle logs
+the view, may update completion tracking, and can finalise an already-expired
+attempt. This command only reads the resulting overview, not quiz questions.
 
 Group registration submits and confirms a real registration:
 
